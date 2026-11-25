@@ -1001,6 +1001,12 @@ scene bar {
     // and a 600 px/s shove (the reading rose and faded), because 120 ms is not photogenic.
     on change now.minute { impulse tick.dip 34 }
 
+    // The monitor volume ceiling for this host: the Genelec SAM pair hangs off
+    // the RME HDSPe AES output at a fixed sensitivity, so -40 dB is as loud as
+    // this desk should go. The plugin's frozen default (-20, Quickshell's
+    // Settings.json genelecMaxVolume) is a generic one; the scene owns the
+    // per-host cap. Tripped once per load with the entrance slide's fact.
+    on change bar.reveal { Genelec.maxVolume = -40 }
     // The analyser is only drawn while the pointer is on the media capsule (its 29 px of room
     // are reserved in that capsule's own width), and the plugin spawns cava only while its
     // `active` fact holds — a plugin that decided for itself would keep the process and the
