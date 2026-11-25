@@ -1,0 +1,100 @@
+{
+  "nodes": {
+    "marea": {
+      "inputs": {
+        "nixpkgs": [
+          "pleamar-wm",
+          "nixpkgs"
+        ],
+        "pleamar": [
+          "pleamar-wm",
+          "pleamar"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791976862,
+        "narHash": "sha256-0Kw9crEPVwVuSBjOHLIEroX+QWdaAD8lSWF23ZjfyqI=",
+        "owner": "k4ditano",
+        "repo": "marea-plm",
+        "rev": "2b6a0649ec3a8d7d1122640c3f0d9b156bf56527",
+        "type": "github"
+      },
+      "original": {
+        "owner": "k4ditano",
+        "repo": "marea-plm",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1795234589,
+        "narHash": "sha256-f/VVvxf5RsQgWVhUtefoca5ktVg0DA2bnkMOcmSnozo=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "2786a2a72088ecf32aea5b3ec52099e6a7cff78f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "pleamar": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793811162,
+        "narHash": "sha256-GAAkUrrnIR6pM5vhgJnmROkEJHPmIbUgRAKnSBT8Big=",
+        "owner": "k4ditano",
+        "repo": "pleamar",
+        "rev": "eebd61adf88b25b6f3fb607d632b84a359237f7c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "k4ditano",
+        "repo": "pleamar",
+        "rev": "eebd61adf88b25b6f3fb607d632b84a359237f7c",
+        "type": "github"
+      }
+    },
+    "pleamar-wm": {
+      "inputs": {
+        "marea": "marea",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "pleamar": [
+          "pleamar"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795470499,
+        "narHash": "sha256-bfTVEP/p9PaIqbv44bjU18XNrKloOlAOdpxgLdctpl8=",
+        "owner": "k4ditano",
+        "repo": "pleamar-wm",
+        "rev": "5d8771bab7968a7134825a93c6cfbd811a75cdab",
+        "type": "github"
+      },
+      "original": {
+        "owner": "k4ditano",
+        "repo": "pleamar-wm",
+        "rev": "5d8771bab7968a7134825a93c6cfbd811a75cdab",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "pleamar": "pleamar",
+        "pleamar-wm": "pleamar-wm"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
