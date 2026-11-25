@@ -35,6 +35,8 @@ pleamar-config.liveRoot = "/home/neg/src/pleamar-config";  # live scene links
 theme pipeline) and `modules/login.nix` (the greetd login screen). `liveRoot`
 null links the store copy (`pkgs.pleamar-tree`) instead.
 
+Maintenance notes and the known gaps are in `docs/MAINTENANCE.md`.
+
 ## Layout
 
 - `lib/` — shared scene libraries (palette, capsule, menu, icons). Strict, no scene-specific
