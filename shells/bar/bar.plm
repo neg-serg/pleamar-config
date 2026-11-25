@@ -888,8 +888,9 @@ scene bar {
     // The recording capsule reads the recorder's pidfile and state through
     // `cat`/`ps`, stops a take with `screenrec`, and follows the two recorded
     // sources with `cava` instances of its own; `wpctl` names the default
-    // microphone cava should listen to.
-    permissions { run: "cat", "hyprctl", "hypr-expo", "ip", "ping", "dash", "curl", "date", "nc", "pleamar", "pleamar-sysmon", "pwroute", "systemctl", "window-activate", "nixbuild-status", "mpc", "genlc", "playerctl", "ffprobe", "screenrec", "cava", "wpctl", "ps"; services: "clock", "workspaces", "workspaces.focus", "audio", "audio.*", "network", "bluetooth", "tray", "tray.activate", "tray.context", "tray.menu_click", "media", "media.*", "env", "files", "files.write", "say:panels", "nixbuild-status" }
+    // microphone cava should listen to. `pgrep` is the now-playing plate's
+    // "is a game running" probe (`bar.luau`, the LLM game guard's patterns).
+    permissions { run: "cat", "hyprctl", "hypr-expo", "ip", "ping", "dash", "curl", "date", "nc", "pleamar", "pleamar-sysmon", "pwroute", "systemctl", "window-activate", "nixbuild-status", "mpc", "genlc", "playerctl", "ffprobe", "screenrec", "cava", "wpctl", "ps", "pgrep"; services: "clock", "workspaces", "workspaces.focus", "audio", "audio.*", "network", "bluetooth", "tray", "tray.activate", "tray.context", "tray.menu_click", "media", "media.*", "env", "files", "files.write", "say:panels", "nixbuild-status" }
 
     // ------------------------------------------------------------------ data
     // One record per workspace; `active` says whether that one is the active

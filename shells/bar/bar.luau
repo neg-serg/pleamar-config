@@ -902,12 +902,21 @@ local function toggle_drawer(name)
     })
 end
 
--- ---------------------------------------------------- a new cover asks for the card
--- The now-playing plate announces a new track: a cover that changes while the
--- chosen player is playing asks the `panels` scene for the `media` drawer. The
--- first report of the session is not a change (nothing was on screen before),
--- an open drawer is never taken over — the owner's own drawer stays — and the
+-- ---------------------------------------------------- a new album asks for the card
+-- The now-playing plate announces a new album: an album tag that changes while
+-- the chosen player is playing asks the `panels` scene for the `media` drawer. A
+-- new track inside the same album is not a change — the cover changes on every
+-- track (MPD exports each one), and that is what used to slide the card out for
+-- each song — and the first report of the session is not a change either
+-- (nothing was on screen before). The album is taken only from a report that is
+-- playing, so a pause between two albums cannot swallow the second one's plate.
+-- An open drawer is never taken over — the owner's own drawer stays — and the
 -- card closes on the scene's own idle timer, like every drawer.
+--
+-- No game is running: a game owns the screen and the GPU, and a plate sliding in
+-- over it is in the way (the owner's ask). The probe uses the LLM game guard's
+-- own definition (`modules/llm/llama-swap.nix`): the same processes mean
+-- "gaming" there and here.
 --
 -- The drawer is asked for only when nothing is open. The scene answers `none`
 -- from the load and nothing at all while it is not running (on demand), so both
@@ -916,16 +925,23 @@ end
 -- window is on screen (`special:aurora` shown) or holds the keyboard, the album
 -- that changed is already in front of them and the card would cover it, so the
 -- compositor is asked first and the drawer is left alone (the owner's ask).
--- The last cover is kept by a closure, not by a chunk-level local: the logic is
+-- The last album is kept by a closure, not by a chunk-level local: the logic is
 -- at LuaJIT's 200-local ceiling for a chunk's main function, and this watcher is
 -- not allowed to push it over.
 sys.watch("media", (function()
-    local lastCover
+    -- The game guard's patterns, an ERE matched against the whole command line.
+    -- A local of this closure for the same ceiling reason as `lastAlbum`.
+    local GAME = "(^|/)(gamescope|wine|wine64|wineserver|wine-preloader|wine64-preloader|lutris|heroic)( |$)"
+        .. "|steamapps/common/|steam-launch-wrapper|\\.exe"
+    local lastAlbum
+    local probe = 0
     return function(m)
-        if type(m) ~= "table" or type(m.art) ~= "string" or m.art == "" then return end
-        local changed = lastCover ~= nil and m.art ~= lastCover
-        lastCover = m.art
-        if not changed or m.playing ~= true then return end
+        if type(m) ~= "table" or m.playing ~= true then return end
+        local album = (type(m.album) == "string") and m.album or ""
+        if album == "" then return end
+        local changed = lastAlbum ~= nil and album ~= lastAlbum
+        lastAlbum = album
+        if not changed then return end
         -- The drawer is asked for only when nothing is open (the `dash` below); the
         -- compositor question comes first because it needs no `panels` scene and is
         -- the one that keeps the plate off a player already on screen.
@@ -938,20 +954,31 @@ sys.watch("media", (function()
                 if code == 0 then open_drawer("media") end
             end)
         end
-        run("hyprctl", { "-j", "monitors" }, function(out, code)
-            local ok, monitors = false, nil
-            if code == 0 then ok, monitors = pcall(json.decode, out) end
-            if ok and type(monitors) == "table" then
-                for _, mon in ipairs(monitors) do
-                    local special = mon.specialWorkspace
-                    if type(special) == "table" and special.name == "special:aurora" then return end
+        -- A newer album that arrives while `pgrep` is out makes this answer stale,
+        -- and the counter keeps the older probe from sliding a second plate.
+        probe = probe + 1
+        local mine = probe
+        -- `pgrep` runs as itself, never through `dash`: a shell's argv carries the
+        -- pattern and matches it — the trap the guard's own note names. Exit 0 is a
+        -- game (leave the plate alone), 1 is none, and any other failure (a `pgrep`
+        -- that cannot run) must not swallow the plate.
+        run("pgrep", { "-f", GAME }, function(_, code)
+            if code == 0 or mine ~= probe then return end
+            run("hyprctl", { "-j", "monitors" }, function(out, code2)
+                local ok, monitors = false, nil
+                if code2 == 0 then ok, monitors = pcall(json.decode, out) end
+                if ok and type(monitors) == "table" then
+                    for _, mon in ipairs(monitors) do
+                        local special = mon.specialWorkspace
+                        if type(special) == "table" and special.name == "special:aurora" then return end
+                    end
                 end
-            end
-            run("hyprctl", { "-j", "activewindow" }, function(win, win_code)
-                local seen, active = false, nil
-                if win_code == 0 then seen, active = pcall(json.decode, win) end
-                if seen and type(active) == "table" and active.class == "player" then return end
-                open_card()
+                run("hyprctl", { "-j", "activewindow" }, function(win, win_code)
+                    local seen, active = false, nil
+                    if win_code == 0 then seen, active = pcall(json.decode, win) end
+                    if seen and type(active) == "table" and active.class == "player" then return end
+                    open_card()
+                end)
             end)
         end)
     end
