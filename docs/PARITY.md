@@ -418,3 +418,16 @@ What stopped the lock was the engine, in two ways. The first is patched here; th
 - **The frame cost is still unmeasured.** The one good engage lasted seconds, and the `--report` run
   arrived after the compositor had stopped granting locks. 3840×2160 gets numbers next time; nothing
   so far suggests the preview's 8.6 ms — this is one glass card, not a wall of widgets.
+
+- **The pace is the login's latency, and 3 fps was the wrong trade — fixed 2026-11-26 (`ebe1ca6`).**
+  The scene idled at `rate: 60, 3 while …` to spare a 4K panel a full-screen shader pass per frame,
+  but the wake-up to 60 is not free: `typing` comes from the logic's poll of `text.password` (a
+  scene rule cannot name a secret input's text), and the pace changes on a frame boundary, an idle
+  step costing two of them. Measured on `lock/preview.plm` at a 3840×2160 buffer: a keystroke
+  reached the screen **380–400 ms late**, the smooth cadence only started **~710 ms** in, and every
+  hover or press on the card was quantized to 333 ms. The idle step is 30 now, the poll 25 ms and
+  the `typing` tail 1.5 s: **~35–55 ms** from a key to the frame carrying it (~90 ms worst case).
+  Cost at 4K, GPU busy from `/sys/class/drm/card1/device/gpu_busy_percent`: **5 % → 13 %** for the
+  idle step against 18 % for a full 60, and the frame itself 11.7 ms mean · p99 17.3 at 60 — the old
+  step was buying frames nothing needed. The login log's `this scene does not keep up … against the
+  16.7` is a false alarm: its window mixes idle frames with a 60 fps target.
