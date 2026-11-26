@@ -137,16 +137,21 @@ local busy = false
 -- field and mirror a change into the scene fact `typing`, which falls back after the echo stops.
 -- A scene rule cannot name `text.password` (the input is secret and lives in the surface's
 -- scope); the logic is its only reader, so the poll lives here.
+--
+-- Both numbers are the keystroke latency seen at the login: the poll (25 ms; at 80 ms a key also
+-- waited a fifth of a frame beyond the idle step) and the tail (1.5 s; at 700 ms a password typed
+-- a key a second fell back to the idle step between two keys, which is exactly where the 333 ms
+-- the old 3 fps step cost showed). The pace itself is the scene's `rate:` line.
 local typing_gen = 0
 local last_password = ""
-every(80, function()
+every(25, function()
     local now = text.password or ""
     if now == last_password then return end
     last_password = now
     typing_gen = typing_gen + 1
     local mine = typing_gen
     fact.typing = true
-    after(700, function()
+    after(1500, function()
         if mine == typing_gen then fact.typing = false end
     end)
 end)

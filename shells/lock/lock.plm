@@ -97,16 +97,20 @@ scene lock {
         // screen half a panel off (`pleamar-lock-full.patch`); a face now also prints
         // its box and the corner it paints from, and the login layer reports them.
         size: full, full
-        // The pace. This scene used to run at the monitor's rate, so a 4K panel at 240 Hz
+        // The pace. The scene used to run at the monitor's rate, so a 4K panel at 240 Hz
         // repainted the full-screen backdrop shader and the glass 240 times a second for a
-        // screen that changes once a minute (measured at 1920x1080: 69 % of the card busy for a
-        // still picture). It then idled at 15; both are still too much for a 4K panel, where
-        // every frame is a full-screen shader pass. The idle rate is 3 now, and the one thing
-        // that needs the display's rate — the keystroke echo — raises the scene's `typing` fact
-        // from the logic (lock.luau polls the field; a scene rule cannot name a secret input's
-        // text), so a login that waits costs next to nothing and typing is still answered at 60.
-        // Measured on the preview at 720p: 4 % of the card busy idle, 10 % while typing.
-        rate: 60, 3 while appear > 0.99 and shake == 0 and not busy and not typing
+        // screen that changes once a minute. The answer then was to idle at 3, and that was the
+        // wrong trade on the one screen where the first keystroke matters: the wake-up to 60 is
+        // not free — the logic polls the field into `typing`, and the pace changes on a frame
+        // boundary, an idle step costing two of them — so a keystroke reached the screen 380–400
+        // ms late and the smooth cadence only started ~710 ms in, with every hover and press on
+        // the card quantized to 333 ms as well (measured on this scene at a 3840x2160 buffer).
+        //
+        // The idle step is 30 now. The same measurement: ~90 ms worst case (33 ms a frame plus
+        // one more after `typing` flips), ~8 % of the card at 4K against 18 % for a full 60, and
+        // the keystroke echo — the one thing that needs the display's rate — still answered at
+        // 60. The logic's 1.5 s tail keeps it there across a slowly typed password.
+        rate: 60, 30 while appear > 0.99 and shake == 0 and not busy and not typing
         open: locked
         keyboard: exclusive while locked
         agent: hidden
